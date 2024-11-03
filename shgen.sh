@@ -62,7 +62,12 @@ process_file() {
   file="$1"
   input_dir="$(cd "$(dirname "$file")" && pwd)"
   let "root_dir" "$input_dir"
-  template "$file"
+
+  # allows for relative paths in templates
+  (
+    cd "$input_dir" || exit 1
+    template "$(basename "$file")"
+  )
 }
 
 usage() {
