@@ -58,41 +58,103 @@ template() {
   done < "$1"
 }
 
+process_file() {
+  file="$1"
+  input_dir="$(cd "$(dirname "$file")" && pwd)"
+  let "root_dir" "$input_dir"
+  template "$file"
+}
+
 usage() {
-  echo "Usage: $0 in_pattern... out_directory out_extension"
-  echo "Example:"
-  echo "  $0 a.smd b.smd output/ md"
-  echo "  $0     *.shtml output/ html"
-  echo "  $0 /dir/*.stxt output/ txt"
+  echo "usage: $0 [OPTIONS] file..."
+  echo
+  echo "options:"
+  echo "  -o, --output    <dir>  output directory (optional)"
+  echo "  -e, --extension <ext>  output extension (required with -o)"
+  echo "  -h, --help             show this help message"
+  echo
+  echo "examples:"
+  echo "  $0 file.shtxt                           # write to stdout"
+  echo "  $0 *.shtxt -e txt -o output/            # process multiple files to directory"
+  echo "  $0 a.shtxt b.shtxt -e txt -o output/    # process specific files"
 }
 
 main() {
-  if [ "$#" -lt 3 ]; then
+  extension=""
+  output_dir=""
+  files=""
+
+  # command line options
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -e|--extension)
+        shift
+        if [ $# -eq 0 ]; then
+          echo "error: -e requires an extension argument" >&2
+          usage
+          exit 1
+        fi
+        extension="$1"
+        ;;
+      -o|--output)
+        shift
+        if [ $# -eq 0 ]; then
+          echo "error: -o requires a directory argument" >&2
+          usage
+          exit 1
+        fi
+        output_dir="$1"
+        ;;
+      -*)
+        echo "error: unknown option: $1" >&2
+        usage
+        exit 1
+        ;;
+      *)
+        if [ -z "$files" ]; then
+          files="$1"
+        else
+          files="$files $1"
+        fi
+        ;;
+    esac
+    shift
+  done
+
+  if [ -z "$files" ]; then
+    echo "error: no input files specified" >&2
     usage
     exit 1
   fi
 
-  output="${@: -2:1}" # get the second last argument (output directory)
-  extension="${@: -1}" # get last argument (output extension)
-  input_patterns="${@:1:$(($# - 1))}" # get all arguments except the last one (input_patterns)
+  # require extension if output is specified
+  if [ -n "$output_dir" ] && [ -z "$extension" ]; then
+    echo "error: output extension (-e) is required when using -o" >&2
+    usage
+    exit 1
+  fi
 
-  mkdir -p "$output"
 
-  # process all input files
-  for pattern in $input_patterns; do
-    find . -type f -name "$(basename "$pattern")" | while read -r file; do
-      if [ -f "$file" ]; then
-        base_name="${file##*/}" # filename without extension
-        output_file="${output}/${base_name%.*}.$extension" # replace .extension with .html
+  for file in $files; do
+    if [ ! -f "$file" ]; then
+      echo "warning: file not found: $file" >&2
+      continue
+    fi
 
-        relativeDir="$(dirname "$file")" # for use in template
-        mkdir -p "$(dirname "$output_file")"
-        template "$file" > "$output_file"
-      fi
-    done
+    if [ -n "$output_dir" ]; then
+      mkdir -p "$output_dir"
+      base_name="$(basename "$file")"
+      output_file="$output_dir/${base_name%.*}.$extension"
+      mkdir -p "$(dirname "$output_file")"
+      process_file "$file" > "$output_file"
+    else
+      process_file "$file"
+    fi
   done
-
-  exit 0
 }
 
 main "$@"
