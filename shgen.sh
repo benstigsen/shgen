@@ -1,5 +1,25 @@
 #!/bin/sh
 
+# to store variables across command substitutions
+# useful to define frontmatter
+VARS_FILE="/tmp/template_vars_$$"
+touch "$VARS_FILE"
+trap 'rm -f $VARS_FILE' EXIT
+
+# $(let x 5)
+let() {
+  local name="$1"
+  local value="$2"
+  echo "$name=\"$value\"" >> "$VARS_FILE"
+}
+
+# $(get x)
+get() {
+  local name="$1"
+  . "$VARS_FILE" 2>/dev/null
+  eval "echo \"\$$name\""
+}
+
 # $(evaluate '$test')
 evaluate() {
   if eval "$1"; then
@@ -9,7 +29,8 @@ evaluate() {
   fi
 }
 
-# $(loop "$(ls)" '$index is $item!') # note the single quotes
+# $(loop "$(ls)" '$index is $item!')
+# note the single quotes for the second argument
 loop() {
   items="$1"
   template="$2"
