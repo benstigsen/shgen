@@ -38,15 +38,12 @@ run it like this: `shgen foo.shtml`
 
 ## usage
 ```sh
-usage: shgen [OPTIONS] file...
+usage: shgen [FILE]
 
 options:
-  -o, --output    <dir>  output directory (optional)
-  -e, --extension <ext>  output extension (required with -o)
-  -h, --help             show this help message
+  -h, --help    show this help message
 
 examples:
-  shgen foo.shtml > bar.html
-  shgen ./input/*.shtml -o output/ -e txt
-  shgen a.shtml b.shtml -o output/ -e html
+  shgen template.txt      # process a file
+  cat file.txt | shgen    # process from stdin
 ```
