@@ -47,3 +47,6 @@ examples:
   shgen template.txt      # process a file
   cat file.txt | shgen    # process from stdin
 ```
+
+_**note:** only lines containing `$` will be evaluated.
+use 'single quotes' for strings outside of $(command substitutions) or escape backticks and double quotes with backslash._

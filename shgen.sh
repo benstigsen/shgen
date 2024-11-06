@@ -54,6 +54,11 @@ ternary() {
 # $(template 'file.txt')
 template() {
   while IFS= read -r line; do
+    if echo "$line" | grep -q '\$'; then
+      eval "echo \"$line\""
+    else
+      echo "$line"
+    fi
     eval "echo \"$line\""
   done
 }
