@@ -59,7 +59,6 @@ template() {
     else
       echo "$line"
     fi
-    eval "echo \"$line\""
   done
 }
 
