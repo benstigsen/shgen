@@ -42,15 +42,6 @@ loop() {
   done
 }
 
-# $(ternary "condition" 'true' 'false')
-ternary() {
-  if eval "$1"; then
-    eval "echo \"$2\""
-  else
-    eval "echo \"$3\""
-  fi
-}
-
 # $(template 'file.txt')
 template() {
   while IFS= read -r line; do

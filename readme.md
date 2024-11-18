@@ -6,7 +6,7 @@ tiny posix shell templating engine.
 ```html
 $(cat './partials/header.html')
 
-<p>$(ternary "[ 5 -lt 3 ]" 'true' 'false')</p>
+<p>$([ 5 -lt 3 ] && echo 'true' || echo 'false')</p>
 
 <ul>
 $(loop "$(ls)" '<li>$index is <b>$item</b></li>')
