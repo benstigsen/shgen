@@ -35,8 +35,9 @@ loop() {
   items="$1"
   template="$2"
 
-  index=0
+  export index=0
   for item in $items; do
+    export item
     eval "echo \"$template\""
     index=$((index + 1))
   done
